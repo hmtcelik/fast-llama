@@ -6,13 +6,8 @@ from llama_cpp import Llama
 from llm import init_model
 from api_models import QuestionRequest, QuestionResponse, HealthCheck
 
-app = FastAPI()
 
-
-def get_llm():
-    return app.state.llm
-
-
+# App:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.llm = init_model()
@@ -23,6 +18,12 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
+# Dependencies:
+def get_llm():
+    return app.state.llm
+
+
+# Routes:
 @app.get("/")
 def read_root():
     return HealthCheck(healthy=True)
@@ -41,6 +42,7 @@ def get_answer(data: QuestionRequest, llm: Llama = Depends(get_llm)):
     return QuestionResponse(answer=answer["choices"][0]["text"])
 
 
+# Run:
 if __name__ == "__main__":
     import uvicorn
 
