@@ -4,6 +4,8 @@ Using FastAPI to create a llama service that can be use anywhere to talk with mo
 
 ### (the docker usage will be here soon)
 
+> - (will be here a simple chat service that can be used to talk with model, with also considering message history)
+
 ## Installation
 
 ```bash
