@@ -5,9 +5,10 @@ from llama_cpp import Llama
 
 from llm import init_model
 from api_models import QuestionRequest, QuestionResponse, HealthCheck
+from fastapi.middleware.cors import CORSMiddleware
 
 
-# App:
+# App setup:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.llm = init_model()
@@ -15,7 +16,18 @@ async def lifespan(app: FastAPI):
     # NOTE: Clean up resources if needed when the app is shutting down
 
 
+# Init App:
 app = FastAPI(lifespan=lifespan)
+
+
+# CORS:
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # Dependencies:
@@ -29,7 +41,7 @@ def read_root():
     return HealthCheck(healthy=True)
 
 
-@app.post("/question/")
+@app.post("/question")
 def get_answer(data: QuestionRequest, llm: Llama = Depends(get_llm)):
     answer = llm(
         f"Q: {data.q} A:",  # Prompt
