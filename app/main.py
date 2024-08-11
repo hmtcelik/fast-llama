@@ -4,7 +4,12 @@ from contextlib import asynccontextmanager
 from llama_cpp import Llama
 
 from llm import init_model
-from api_models import QuestionRequest, QuestionResponse, HealthCheck
+from api_models import (
+    QuestionRequest,
+    QuestionResponse,
+    HealthCheck,
+    ChatRequest,
+)
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -52,6 +57,24 @@ def get_answer(data: QuestionRequest, llm: Llama = Depends(get_llm)):
         ],  # Stop generating just before the model would generate a new question
     )
     return QuestionResponse(answer=answer["choices"][0]["text"])
+
+
+@app.post("/chat")
+def chat(data: ChatRequest, llm: Llama = Depends(get_llm)):
+    messages = [
+        {
+            "role": "system",
+            "content": "You are a helpful assistant that answers questions.",
+        },
+        *[
+            {"role": message.role, "content": message.content}
+            for message in data.messages
+        ],
+    ]
+    answer = llm.create_chat_completion(
+        messages=messages,
+    )
+    return QuestionResponse(answer=answer["choices"][0]["message"]["content"])
 
 
 # Run:
